@@ -1,4 +1,73 @@
 package com.example.demo.service.ServiceImpl;
 
-public class ClassSessionServiceImpl {
+import com.example.demo.dto.Request.ClassSessionRequest;
+import com.example.demo.dto.Response.ClassSessionResponse;
+import com.example.demo.mapper.ClassSessionMapper;
+import com.example.demo.modal.ClassEntity;
+import com.example.demo.modal.ClassSession;
+import com.example.demo.modal.Subject;
+import com.example.demo.modal.User;
+import com.example.demo.repository.ClassEntityRepository;
+import com.example.demo.repository.ClassSessionRepository;
+import com.example.demo.repository.SubjectRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.service.ClassSessionService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ClassSessionServiceImpl implements ClassSessionService {
+
+    private final ClassSessionRepository sessionRepository;
+    private final ClassEntityRepository classRepository;
+    private final SubjectRepository subjectRepository;
+    private final UserRepository userRepository;
+    private final ClassSessionMapper sessionMapper;
+
+    @Override
+    public ClassSessionResponse createSession(ClassSessionRequest sessionRequest) {
+        ClassEntity classEntity = classRepository.findById(sessionRequest.clazz())
+                .orElseThrow(() -> new RuntimeException("Class not found"));
+        Subject subject = subjectRepository.findById(sessionRequest.subject())
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+        User teacher = userRepository.findById(sessionRequest.teacher())
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+        ClassSession session = new ClassSession();
+        session.setClazz(classEntity);
+        session.setSubject(subject);
+        session.setTeacher(teacher);
+
+        return sessionMapper.toClassSessionResponse(sessionRepository.save(session));
+    }
+
+    @Override
+    public ClassSessionResponse getSessionById(Long id) {
+        ClassSession session = sessionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+        return sessionMapper.toClassSessionResponse(session);
+    }
+
+    @Override
+    public List<ClassSessionResponse> getAllSessions() {
+        return sessionRepository.findAll().stream()
+                .map(sessionMapper::toClassSessionResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ClassSessionResponse> getSessionsByClass(Long classId) {
+        return sessionRepository.findByClazzId(classId).stream()
+                .map(sessionMapper::toClassSessionResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteSession(Long id) {
+        sessionRepository.deleteById(id);
+    }
 }

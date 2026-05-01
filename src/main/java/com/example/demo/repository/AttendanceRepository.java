@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     List<Attendance> findByEnrollmentId(Long enrollmentId);
-    List<Attendance> findSessionById(Long sessionId);
+    List<Attendance> findBySessionId(Long sessionId);
     Optional<Attendance> findByEnrollmentIdAndSessionId(Long enrollmentId, Long sessionId);
     List<Attendance> findByStatus(Status status);
 }
