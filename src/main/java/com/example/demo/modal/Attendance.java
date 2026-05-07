@@ -30,4 +30,6 @@ public class Attendance {
     @ManyToOne
     @JoinColumn(name = "recorded_by")
     private User recordedBy;
+
+    private String remark;
 }

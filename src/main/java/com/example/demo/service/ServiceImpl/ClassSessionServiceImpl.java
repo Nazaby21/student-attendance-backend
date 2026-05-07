@@ -30,15 +30,15 @@ public class ClassSessionServiceImpl implements ClassSessionService {
 
     @Override
     public ClassSessionResponse createSession(ClassSessionRequest sessionRequest) {
-        ClassEntity classEntity = classRepository.findById(sessionRequest.clazz())
+        ClassEntity clazz = classRepository.findById(sessionRequest.clazz())
                 .orElseThrow(() -> new RuntimeException("Class not found"));
         Subject subject = subjectRepository.findById(sessionRequest.subject())
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
         User teacher = userRepository.findById(sessionRequest.teacher())
                 .orElseThrow(() -> new RuntimeException("Teacher not found"));
 
-        ClassSession session = new ClassSession();
-        session.setClazz(classEntity);
+        ClassSession session = sessionMapper.toClassSessionEntity(sessionRequest);
+        session.setClazz(clazz);
         session.setSubject(subject);
         session.setTeacher(teacher);
 
@@ -64,6 +64,27 @@ public class ClassSessionServiceImpl implements ClassSessionService {
         return sessionRepository.findByClazzId(classId).stream()
                 .map(sessionMapper::toClassSessionResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ClassSessionResponse updateSession(Long id, ClassSessionRequest sessionRequest) {
+        ClassSession session = sessionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        ClassEntity clazz = classRepository.findById(sessionRequest.clazz())
+                .orElseThrow(() -> new RuntimeException("Class not found"));
+        Subject subject = subjectRepository.findById(sessionRequest.subject())
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+        User teacher = userRepository.findById(sessionRequest.teacher())
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+        session.setClazz(clazz);
+        session.setSubject(subject);
+        session.setTeacher(teacher);
+        session.setDate(sessionRequest.date());
+        session.setTimeSlot(sessionRequest.timeSlot());
+
+        return sessionMapper.toClassSessionResponse(sessionRepository.save(session));
     }
 
     @Override

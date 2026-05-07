@@ -10,5 +10,6 @@ public interface ClassSessionService {
     ClassSessionResponse getSessionById(Long id);
     List<ClassSessionResponse> getAllSessions();
     List<ClassSessionResponse> getSessionsByClass(Long classId);
+    ClassSessionResponse updateSession(Long id, ClassSessionRequest sessionRequest);
     void deleteSession(Long id);
 }

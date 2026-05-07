@@ -31,6 +31,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    @GetMapping("/role/{role}")
+    public ResponseEntity<List<UserResponse>> getUsersByRole(@PathVariable com.example.demo.enumeration.Role role) {
+        return ResponseEntity.ok(userService.getUsersByRole(role));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest) {
         return ResponseEntity.ok(userService.updateUser(id, userRequest));

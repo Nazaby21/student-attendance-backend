@@ -4,8 +4,15 @@ import com.example.demo.enumeration.Status;
 
 public record AttendanceResponse(
         Long id,
-        Long enrollment,
-        Long session,
-        Status status
+        Long studentId,
+        String studentName,
+        Long classId,
+        String className,
+        Long sessionId,
+        String sessionDate,
+        String sessionTimeSlot,
+        Status status,
+        String recordedBy,
+        String remark
 ) {
 }

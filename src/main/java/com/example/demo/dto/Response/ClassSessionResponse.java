@@ -2,8 +2,13 @@ package com.example.demo.dto.Response;
 
 public record ClassSessionResponse(
         Long id,
-        Long clazz,
-        Long subject,
-        Long teacher
+        Long clazzId,
+        String className,
+        Long subjectId,
+        String subjectName,
+        Long teacherId,
+        String teacherName,
+        String date,
+        String timeSlot
 ) {
 }

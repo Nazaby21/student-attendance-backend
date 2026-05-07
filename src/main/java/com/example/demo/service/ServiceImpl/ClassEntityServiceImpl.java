@@ -44,6 +44,9 @@ public class ClassEntityServiceImpl implements ClassEntityService {
         ClassEntity classEntity = classRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Class not found with id: " + id));
         classEntity.setClassName(classRequest.className());
+        classEntity.setCode(classRequest.code());
+        classEntity.setSection(classRequest.section());
+        classEntity.setDescription(classRequest.description());
         classEntity.setYear(classRequest.year());
         return classMapper.toClassEntityResponse(classRepository.save(classEntity));
     }

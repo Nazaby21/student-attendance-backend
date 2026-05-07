@@ -11,5 +11,6 @@ public interface AttendanceService {
     List<AttendanceResponse> getAllAttendance();
     List<AttendanceResponse> getAttendanceBySession(Long sessionId);
     List<AttendanceResponse> getAttendanceByEnrollment(Long enrollmentId);
+    List<AttendanceResponse> getAttendanceByClassAndDate(Long classId, String date);
     void deleteAttendance(Long id);
 }

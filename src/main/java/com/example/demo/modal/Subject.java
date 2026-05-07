@@ -18,5 +18,13 @@ public class Subject {
     @Column(name = "subject_name")
     private String subjectName;
 
+    private String code;
+
+    private Integer credits;
+
+    @ManyToOne
+    @JoinColumn(name = "class_id")
+    private ClassEntity clazz;
+
 
 }

@@ -27,4 +27,9 @@ public class ClassSession {
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
 
+    private String date;
+
+    @Column(name = "time_slot")
+    private String timeSlot;
+
 }

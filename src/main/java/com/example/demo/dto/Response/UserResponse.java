@@ -7,8 +7,12 @@ public record UserResponse(
         Long id,
         String name,
         String email,
+        String rollNumber,
+        String dateOfBirth,
+        String address,
         String phoneNumber,
         Gender gender,
-        Role role
+        Role role,
+        Long classId
 ) {
 }

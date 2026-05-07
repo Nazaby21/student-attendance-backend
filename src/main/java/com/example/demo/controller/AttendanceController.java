@@ -41,6 +41,13 @@ public class AttendanceController {
         return ResponseEntity.ok(attendanceService.getAttendanceByEnrollment(enrollmentId));
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<AttendanceResponse>> getAttendanceByClassAndDate(
+            @RequestParam Long classId,
+            @RequestParam String date) {
+        return ResponseEntity.ok(attendanceService.getAttendanceByClassAndDate(classId, date));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAttendance(@PathVariable Long id) {
         attendanceService.deleteAttendance(id);

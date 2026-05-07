@@ -9,14 +9,17 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ClassSessionMapper {
 
-    @Mapping(source = "clazz.id", target = "clazz")
-    @Mapping(source = "subject.id", target = "subject")
-    @Mapping(source = "teacher.id", target = "teacher")
+    @Mapping(target = "clazzId", source = "clazz.id")
+    @Mapping(target = "className", source = "clazz.className")
+    @Mapping(target = "subjectId", source = "subject.id")
+    @Mapping(target = "subjectName", source = "subject.subjectName")
+    @Mapping(target = "teacherId", source = "teacher.id")
+    @Mapping(target = "teacherName", source = "teacher.name")
     ClassSessionResponse toClassSessionResponse(ClassSession classSession);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "clazz.id", source = "clazz")
-    @Mapping(target = "subject.id", source = "subject")
-    @Mapping(target = "teacher.id", source = "teacher")
+    @Mapping(target = "clazz", ignore = true)
+    @Mapping(target = "subject", ignore = true)
+    @Mapping(target = "teacher", ignore = true)
     ClassSession toClassSessionEntity(ClassSessionRequest classSessionRequest);
 }

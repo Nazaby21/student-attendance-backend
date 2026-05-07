@@ -7,6 +7,7 @@ import com.example.demo.modal.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,10 +19,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponse createUser(UserRequest userRequest) {
         User user = userMapper.toUserEntity(userRequest);
+        user.setPassword(passwordEncoder.encode(userRequest.password()));
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
@@ -40,14 +43,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserResponse> getUsersByRole(com.example.demo.enumeration.Role role) {
+        return userRepository.findByRole(role).stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public UserResponse updateUser(Long id, UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         
         user.setName(userRequest.name());
         user.setEmail(userRequest.email());
+        user.setRollNumber(userRequest.rollNumber());
+        user.setDateOfBirth(userRequest.dateOfBirth());
+        user.setAddress(userRequest.address());
         user.setPhoneNumber(userRequest.phoneNumber());
-        user.setPassword(userRequest.password());
+        if (userRequest.password() != null && !userRequest.password().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userRequest.password()));
+        }
         user.setGender(userRequest.gender());
         user.setRole(userRequest.role());
         

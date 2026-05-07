@@ -18,5 +18,11 @@ public class ClassEntity {
     @Column(name = "class_name")
     private String className;
 
+    private String code;
+
+    private String section;
+
+    private String description;
+
     private int year;
 }
