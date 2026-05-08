@@ -19,7 +19,7 @@ public class ClassEntityController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ClassEntityResponse> createClass(@RequestBody ClassEntityRequest classRequest) {
+    public ResponseEntity<ClassEntityResponse> createClass(@jakarta.validation.Valid @RequestBody ClassEntityRequest classRequest) {
         return ResponseEntity.ok(classService.createClass(classRequest));
     }
 
@@ -37,7 +37,7 @@ public class ClassEntityController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ClassEntityResponse> updateClass(@PathVariable Long id, @RequestBody ClassEntityRequest classRequest) {
+    public ResponseEntity<ClassEntityResponse> updateClass(@PathVariable Long id, @jakarta.validation.Valid @RequestBody ClassEntityRequest classRequest) {
         return ResponseEntity.ok(classService.updateClass(id, classRequest));
     }
 

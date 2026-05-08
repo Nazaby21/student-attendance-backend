@@ -6,7 +6,8 @@ import java.util.List;
 
 public interface BlacklistService {
     BlacklistResponse addToBlacklist(BlacklistRequest blacklistRequest);
-    List<BlacklistResponse> getAllBlacklisted();
+    List<BlacklistResponse> getFilteredBlacklist(Integer months, Long classId);
+    List<BlacklistResponse> getFilteredBlacklistHistory(Integer months, Long classId);
     void removeFromBlacklist(Long id);
     boolean isBlacklisted(Long studentId);
 }

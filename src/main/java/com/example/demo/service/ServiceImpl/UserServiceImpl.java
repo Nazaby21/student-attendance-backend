@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("User not found with id: " + id));
         return userMapper.toUserResponse(user);
     }
 
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse updateUser(Long id, UserRequest userRequest) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("User not found with id: " + id));
         
         user.setName(userRequest.name());
         user.setEmail(userRequest.email());
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("User not found with id: " + id));
 
         // 1. If Teacher: handle classes and sessions
         if (user.getRole() == com.example.demo.enumeration.Role.TEACHER) {

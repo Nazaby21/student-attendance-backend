@@ -19,7 +19,7 @@ public class SubjectController {
     private final SubjectService subjectService;
 
     @PostMapping
-    public ResponseEntity<SubjectResponse> createSubject(@RequestBody SubjectRequest subjectRequest) {
+    public ResponseEntity<SubjectResponse> createSubject(@jakarta.validation.Valid @RequestBody SubjectRequest subjectRequest) {
         return ResponseEntity.ok(subjectService.createSubject(subjectRequest));
     }
 
@@ -34,7 +34,7 @@ public class SubjectController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SubjectResponse> updateSubject(@PathVariable Long id, @RequestBody SubjectRequest subjectRequest) {
+    public ResponseEntity<SubjectResponse> updateSubject(@PathVariable Long id, @jakarta.validation.Valid @RequestBody SubjectRequest subjectRequest) {
         return ResponseEntity.ok(subjectService.updateSubject(id, subjectRequest));
     }
 

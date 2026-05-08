@@ -13,28 +13,41 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/blacklist")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
 public class BlacklistController {
 
     private final BlacklistService blacklistService;
 
     @PostMapping
-    public ResponseEntity<BlacklistResponse> addToBlacklist(@RequestBody BlacklistRequest blacklistRequest) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BlacklistResponse> addToBlacklist(@jakarta.validation.Valid @RequestBody BlacklistRequest blacklistRequest) {
         return ResponseEntity.ok(blacklistService.addToBlacklist(blacklistRequest));
     }
 
     @GetMapping
-    public ResponseEntity<List<BlacklistResponse>> getAllBlacklisted() {
-        return ResponseEntity.ok(blacklistService.getAllBlacklisted());
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ResponseEntity<List<BlacklistResponse>> getBlacklist(
+            @RequestParam(required = false) Integer months,
+            @RequestParam(required = false) Long classId) {
+        return ResponseEntity.ok(blacklistService.getFilteredBlacklist(months, classId));
+    }
+
+    @GetMapping("/history")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ResponseEntity<List<BlacklistResponse>> getBlacklistHistory(
+            @RequestParam(required = false) Integer months,
+            @RequestParam(required = false) Long classId) {
+        return ResponseEntity.ok(blacklistService.getFilteredBlacklistHistory(months, classId));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> removeFromBlacklist(@PathVariable Long id) {
         blacklistService.removeFromBlacklist(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/check/{studentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<Boolean> isBlacklisted(@PathVariable Long studentId) {
         return ResponseEntity.ok(blacklistService.isBlacklisted(studentId));
     }

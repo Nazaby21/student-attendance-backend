@@ -35,7 +35,7 @@ public class SubjectServiceImpl implements SubjectService {
         Subject subject = subjectMapper.toSubjectEntity(subjectRequest);
         if (subjectRequest.classId() != null) {
             ClassEntity clazz = classRepository.findById(subjectRequest.classId())
-                    .orElseThrow(() -> new RuntimeException("Class not found"));
+                    .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Class not found"));
             subject.setClazz(clazz);
         }
         return subjectMapper.toSubjectResponse(subjectRepository.save(subject));
@@ -44,7 +44,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public SubjectResponse getSubjectById(Long id) {
         Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Subject not found with id: " + id));
+                .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Subject not found with id: " + id));
         return subjectMapper.toSubjectResponse(subject);
     }
 
@@ -59,7 +59,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional
     public SubjectResponse updateSubject(Long id, SubjectRequest subjectRequest) {
         Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Subject not found with id: " + id));
+                .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Subject not found with id: " + id));
         
         subject.setSubjectName(subjectRequest.subjectName());
         subject.setCode(subjectRequest.code());
@@ -67,7 +67,7 @@ public class SubjectServiceImpl implements SubjectService {
         
         if (subjectRequest.classId() != null) {
             ClassEntity clazz = classRepository.findById(subjectRequest.classId())
-                    .orElseThrow(() -> new RuntimeException("Class not found"));
+                    .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Class not found"));
             subject.setClazz(clazz);
         }
 

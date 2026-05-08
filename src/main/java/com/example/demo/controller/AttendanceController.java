@@ -19,7 +19,7 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
 
     @PostMapping
-    public ResponseEntity<AttendanceResponse> recordAttendance(@RequestBody AttendanceRequest attendanceRequest) {
+    public ResponseEntity<AttendanceResponse> recordAttendance(@jakarta.validation.Valid @RequestBody AttendanceRequest attendanceRequest) {
         return ResponseEntity.ok(attendanceService.recordAttendance(attendanceRequest));
     }
 

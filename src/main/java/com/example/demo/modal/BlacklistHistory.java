@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "blacklist")
-public class Blacklist {
+@Table(name = "blacklist_history")
+public class BlacklistHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,8 +24,13 @@ public class Blacklist {
     @JoinColumn(name = "class_id")
     private ClassEntity clazz;
 
-    private String reason;
+    private double points;
 
-    @Column(name = "added_date")
-    private LocalDateTime addedDate;
+    @Column(name = "blacklist_number")
+    private int blacklistNumber;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    private String reason;
 }

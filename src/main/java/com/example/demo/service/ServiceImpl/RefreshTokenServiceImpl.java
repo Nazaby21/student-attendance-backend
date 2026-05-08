@@ -32,7 +32,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Transactional
     public RefreshToken createRefreshToken(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("User not found with id: " + userId));
 
         // Delete existing refresh token for this user to avoid unique constraint violation
         refreshTokenRepository.deleteByUser(user);
@@ -51,7 +51,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
-            throw new RuntimeException("Refresh token was expired. Please make a new signin request");
+            throw new com.example.demo.exception.AppException("Refresh token was expired. Please make a new signin request", org.springframework.http.HttpStatus.UNAUTHORIZED);
         }
 
         return token;

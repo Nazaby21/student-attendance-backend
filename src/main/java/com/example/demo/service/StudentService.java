@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface StudentService {
     UserResponse addStudent(UserRequest studentRequest, Long classId);
+    UserResponse getStudentById(Long id);
     List<UserResponse> getAllStudents();
     UserResponse updateStudent(Long id, UserRequest studentRequest, Long classId);
     void deleteStudent(Long id);

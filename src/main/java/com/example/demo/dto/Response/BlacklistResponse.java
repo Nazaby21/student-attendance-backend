@@ -6,6 +6,8 @@ public record BlacklistResponse(
         Long id,
         Long studentId,
         String studentName,
+        Long classId,
+        String className,
         String reason,
         LocalDateTime addedDate
 ) {

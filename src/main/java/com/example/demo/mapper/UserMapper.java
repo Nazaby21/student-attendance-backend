@@ -13,5 +13,9 @@ public interface UserMapper {
     UserResponse toUserResponse(User user);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "blacklistCount", ignore = true)
+    @Mapping(target = "currentBlacklistPoints", ignore = true)
+    @Mapping(target = "lastBlacklistReset", ignore = true)
+    @Mapping(target = "blacklisted", ignore = true)
     User toUserEntity(UserRequest userRequest);
 }

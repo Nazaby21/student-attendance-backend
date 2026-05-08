@@ -27,13 +27,15 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 
+import org.springframework.security.core.userdetails.UserDetailsService;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsService userDetailsService;
     private final AuthTokenFilter authTokenFilter;
 
     @Bean
@@ -47,7 +49,8 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -86,9 +89,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000", 
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://localhost:5173"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "Origin"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

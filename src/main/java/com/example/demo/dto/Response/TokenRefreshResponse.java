@@ -1,11 +1,11 @@
 package com.example.demo.dto.Response;
 
 public record TokenRefreshResponse(
-    String accessToken,
+    String token,
     String refreshToken,
     String tokenType
 ) {
-    public TokenRefreshResponse(String accessToken, String refreshToken) {
-        this(accessToken, refreshToken, "Bearer");
+    public TokenRefreshResponse(String token, String refreshToken) {
+        this(token, refreshToken, "Bearer");
     }
 }

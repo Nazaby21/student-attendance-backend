@@ -4,5 +4,5 @@ public enum Status {
     ABSENT,
     LATE,
     PRESENT,
-    EXCUSED
+    PERMISSION
 }

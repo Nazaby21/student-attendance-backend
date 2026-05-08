@@ -10,6 +10,7 @@ import lombok.*;
 @ToString
 @Entity
 @Table(name = "subjects")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Subject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +23,7 @@ public class Subject {
 
     private Integer credits;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_id")
     private ClassEntity clazz;
 

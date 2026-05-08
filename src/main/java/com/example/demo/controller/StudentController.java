@@ -22,6 +22,11 @@ public class StudentController {
         return ResponseEntity.ok(studentService.addStudent(studentRequest, classId));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getStudentById(@PathVariable Long id) {
+        return ResponseEntity.ok(studentService.getStudentById(id));
+    }
+
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllStudents() {
         return ResponseEntity.ok(studentService.getAllStudents());

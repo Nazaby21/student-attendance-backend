@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final com.example.demo.repository.ClassEntityRepository classRepository;
 
     @Override
     @Transactional
@@ -21,6 +22,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with email: " + email));
 
-        return UserDetailsImpl.build(user);
+        Long classId = null;
+        if (user.getRole() == com.example.demo.enumeration.Role.TEACHER) {
+            classId = classRepository.findByTeachersId(user.getId()).stream()
+                    .findFirst()
+                    .map(com.example.demo.modal.ClassEntity::getId)
+                    .orElse(null);
+        }
+
+        return UserDetailsImpl.build(user, classId);
     }
 }

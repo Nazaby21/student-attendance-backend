@@ -21,13 +21,15 @@ public class UserDetailsImpl implements UserDetails {
     private Long id;
     private String username;
     private String email;
+    private String name;
+    private Long classId;
 
     @JsonIgnore
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public static UserDetailsImpl build(User user) {
+    public static UserDetailsImpl build(User user, Long classId) {
         List<GrantedAuthority> authorities = Collections.emptyList();
         if (user.getRole() != null) {
             authorities = Collections.singletonList(
@@ -39,6 +41,8 @@ public class UserDetailsImpl implements UserDetails {
                 user.getId(),
                 user.getEmail(), // Using email as username
                 user.getEmail(),
+                user.getName(),
+                classId,
                 user.getPassword(),
                 authorities);
     }

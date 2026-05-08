@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface BlacklistRepository extends JpaRepository<Blacklist, Long> {
     Optional<Blacklist> findByStudentId(Long studentId);
     boolean existsByStudentId(Long studentId);
+    void deleteByStudentId(Long studentId);
 }

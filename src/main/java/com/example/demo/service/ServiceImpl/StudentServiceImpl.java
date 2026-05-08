@@ -13,13 +13,17 @@ import com.example.demo.repository.BlacklistRepository;
 import com.example.demo.repository.ClassEntityRepository;
 import com.example.demo.repository.EnrollmentRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.security.UserDetailsImpl;
 import com.example.demo.service.StudentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,9 +38,41 @@ public class StudentServiceImpl implements StudentService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    private UserDetailsImpl getAuthenticatedUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserDetailsImpl) {
+            return (UserDetailsImpl) auth.getPrincipal();
+        }
+        throw new RuntimeException("Unauthorized");
+    }
+
+    /**
+     * For teachers: validate they are assigned to the target class.
+     * Queries ALL classes assigned to the teacher (supports multi-class teachers).
+     */
+    private void validateTeacherAccess(Long targetClassId) {
+        if (targetClassId == null) return;
+
+        UserDetailsImpl user = getAuthenticatedUser();
+        boolean isTeacher = user.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TEACHER"));
+
+        if (isTeacher) {
+            // Query all classes assigned to this teacher — supports multi-class assignment
+            List<ClassEntity> assignedClasses = classRepository.findByTeachersId(user.getId());
+            boolean isAssigned = assignedClasses.stream()
+                    .anyMatch(c -> c.getId() != null && c.getId().equals(targetClassId));
+            if (!isAssigned) {
+                throw new RuntimeException("Access Denied: You can only manage your assigned class.");
+            }
+        }
+    }
+
     @Override
     @Transactional
     public UserResponse addStudent(UserRequest studentRequest, Long classId) {
+        validateTeacherAccess(classId);
+
         User user = userMapper.toUserEntity(studentRequest);
         user.setRole(Role.STUDENT);
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
@@ -59,7 +95,46 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public UserResponse getStudentById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        Long classId = enrollmentRepository.findByStudentId(user.getId()).stream()
+                .findFirst()
+                .map(e -> e.getClazz().getId())
+                .orElse(null);
+
+        if (classId != null) {
+            validateTeacherAccess(classId);
+        }
+
+        return mapToResponse(user, classId);
+    }
+
+    @Override
     public List<UserResponse> getAllStudents() {
+        UserDetailsImpl authUser = getAuthenticatedUser();
+        boolean isTeacher = authUser.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TEACHER"));
+
+        if (isTeacher) {
+            // Get all class IDs assigned to this teacher
+            Set<Long> teacherClassIds = classRepository.findByTeachersId(authUser.getId()).stream()
+                    .map(ClassEntity::getId)
+                    .collect(Collectors.toSet());
+
+            return userRepository.findByRole(Role.STUDENT).stream()
+                    .map(user -> {
+                        Long classId = enrollmentRepository.findByStudentId(user.getId()).stream()
+                                .findFirst()
+                                .map(e -> e.getClazz().getId())
+                                .orElse(null);
+                        return mapToResponse(user, classId);
+                    })
+                    .filter(response -> response.classId() != null && teacherClassIds.contains(response.classId()))
+                    .collect(Collectors.toList());
+        }
+
         return userRepository.findByRole(Role.STUDENT).stream()
                 .map(user -> {
                     Long classId = enrollmentRepository.findByStudentId(user.getId()).stream()
@@ -74,14 +149,16 @@ public class StudentServiceImpl implements StudentService {
     @Override
     @Transactional
     public UserResponse updateStudent(Long id, UserRequest studentRequest, Long classId) {
+        validateTeacherAccess(classId);
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
-        
+
         user.setName(studentRequest.name());
         user.setEmail(studentRequest.email());
         user.setDateOfBirth(studentRequest.dateOfBirth());
         user.setPhoneNumber(studentRequest.phoneNumber());
-        
+
         if (studentRequest.password() != null && !studentRequest.password().isEmpty()) {
             user.setPassword(passwordEncoder.encode(studentRequest.password()));
         }
@@ -112,13 +189,22 @@ public class StudentServiceImpl implements StudentService {
                 response.phoneNumber(),
                 response.gender(),
                 response.role(),
-                classId
+                classId,
+                response.blacklistCount(),
+                response.currentBlacklistPoints(),
+                response.lastBlacklistReset(),
+                response.blacklisted()
         );
     }
 
     @Override
     @Transactional
     public void deleteStudent(Long id) {
+        UserResponse sr = getStudentById(id);
+        if (sr.classId() != null) {
+            validateTeacherAccess(sr.classId());
+        }
+
         // 1. Delete Attendance records for all enrollments of this student
         List<Enrollment> enrollments = enrollmentRepository.findByStudentId(id);
         for (Enrollment enrollment : enrollments) {

@@ -9,6 +9,7 @@ import com.example.demo.security.JwtUtils;
 import com.example.demo.security.UserDetailsImpl;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -32,6 +34,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        log.info("Login attempt for user: {}", loginRequest.email());
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
@@ -43,9 +46,8 @@ public class AuthController {
                 .anyMatch(r -> r.getAuthority().equals("ROLE_STUDENT"));
         
         if (isStudent) {
-            return ResponseEntity
-                    .status(org.springframework.http.HttpStatus.FORBIDDEN)
-                    .body(java.util.Map.of("message", "Error: Students are not allowed to log in to the admin system."));
+            log.warn("Blocked login attempt for student: {}", loginRequest.email());
+            throw new org.springframework.security.access.AccessDeniedException("Students are not allowed to log in to the admin system.");
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -56,11 +58,14 @@ public class AuthController {
 
         com.example.demo.modal.RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
+        log.info("User logged in successfully: {}", loginRequest.email());
         return ResponseEntity.ok(new JwtResponse(jwt,
                 refreshToken.getToken(),
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
+                userDetails.getName(),
+                userDetails.getClassId(),
                 roles));
     }
 
@@ -75,15 +80,13 @@ public class AuthController {
                     String token = jwtUtils.generateTokenFromUsername(user.getEmail());
                     return ResponseEntity.ok(new com.example.demo.dto.Response.TokenRefreshResponse(token, requestRefreshToken));
                 })
-                .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+                .orElseThrow(() -> new com.example.demo.exception.AppException("Refresh token is not in database!", org.springframework.http.HttpStatus.UNAUTHORIZED));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRequest signUpRequest) {
+    public ResponseEntity<?> registerUser(@jakarta.validation.Valid @RequestBody UserRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.email())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Error: Email is already in use!");
+            throw new com.example.demo.exception.AppException("Email is already in use!", org.springframework.http.HttpStatus.BAD_REQUEST);
         }
 
         UserResponse userResponse = userService.createUser(signUpRequest);

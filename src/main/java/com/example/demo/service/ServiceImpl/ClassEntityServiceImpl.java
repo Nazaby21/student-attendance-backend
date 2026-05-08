@@ -55,12 +55,13 @@ public class ClassEntityServiceImpl implements ClassEntityService {
         List<User> found = userRepository.findAllById(teacherIds);
         for (User u : found) {
             if (u.getRole() != Role.TEACHER) {
-                throw new RuntimeException(
-                        "User id=" + u.getId() + " is not a TEACHER (role=" + u.getRole() + ")");
+                throw new com.example.demo.exception.AppException(
+                        "User id=" + u.getId() + " is not a TEACHER (role=" + u.getRole() + ")", 
+                        org.springframework.http.HttpStatus.BAD_REQUEST);
             }
         }
         if (found.size() != teacherIds.size()) {
-            throw new RuntimeException("One or more teacher IDs were not found");
+            throw new com.example.demo.exception.ResourceNotFoundException("One or more teacher IDs were not found");
         }
         return new HashSet<>(found);
     }
@@ -96,7 +97,7 @@ public class ClassEntityServiceImpl implements ClassEntityService {
     @Transactional(readOnly = true)
     public ClassEntityResponse getClassById(Long id) {
         ClassEntity classEntity = classRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Class not found with id: " + id));
+                .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Class not found with id: " + id));
         
         // Security check for teachers
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -107,9 +108,9 @@ public class ClassEntityServiceImpl implements ClassEntityService {
             
             if (isTeacher) {
                 boolean isAssigned = classEntity.getTeachers().stream()
-                        .anyMatch(t -> t.getId() == userDetails.getId());
+                        .anyMatch(t -> t.getId() != null && t.getId().equals(userDetails.getId()));
                 if (!isAssigned) {
-                    throw new RuntimeException("Access Denied: You are not assigned to this class.");
+                    throw new org.springframework.security.access.AccessDeniedException("Access Denied: You are not assigned to this class.");
                 }
             }
         }
@@ -143,7 +144,7 @@ public class ClassEntityServiceImpl implements ClassEntityService {
     @Transactional
     public ClassEntityResponse updateClass(Long id, ClassEntityRequest classRequest) {
         ClassEntity classEntity = classRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Class not found with id: " + id));
+                .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Class not found with id: " + id));
 
         classEntity.setClassName(classRequest.className());
         classEntity.setDescription(classRequest.description());
@@ -157,7 +158,7 @@ public class ClassEntityServiceImpl implements ClassEntityService {
     @Transactional
     public void deleteClass(Long id) {
         ClassEntity classEntity = classRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Class not found with id: " + id));
+                .orElseThrow(() -> new com.example.demo.exception.ResourceNotFoundException("Class not found with id: " + id));
 
         // 1. Delete Attendance records for all enrollments of this class
         List<Enrollment> enrollments = enrollmentRepository.findByClazzId(id);

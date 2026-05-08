@@ -12,10 +12,11 @@ import lombok.*;
 @ToString
 @Entity
 @Table(name = "users")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     private String name;
     private String email;
 
@@ -31,4 +32,16 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Column(name = "blacklist_count")
+    private Integer blacklistCount = 0;
+
+    @Column(name = "current_blacklist_points")
+    private Double currentBlacklistPoints = 0.0;
+
+    @Column(name = "last_blacklist_reset")
+    private java.time.LocalDateTime lastBlacklistReset = java.time.LocalDateTime.now();
+
+    @Column(name = "is_blacklisted")
+    private Boolean blacklisted = false;
 }

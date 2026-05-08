@@ -8,6 +8,8 @@ public record JwtResponse(
         Long id,
         String username,
         String email,
+        String name,
+        Long classId,
         java.util.List<String> roles
 ) {
 }

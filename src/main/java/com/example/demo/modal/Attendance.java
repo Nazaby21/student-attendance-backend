@@ -11,23 +11,24 @@ import lombok.*;
 @ToString
 @Entity
 @Table(name = "attendances")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Attendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enrollment_id")
     private Enrollment enrollment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id")
     private ClassSession session;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recorded_by")
     private User recordedBy;
 
