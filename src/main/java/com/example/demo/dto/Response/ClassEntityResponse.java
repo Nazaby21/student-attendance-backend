@@ -1,11 +1,14 @@
 package com.example.demo.dto.Response;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 public record ClassEntityResponse(
         Long id,
         String className,
-        String code,
-        String section,
         String description,
-        int year
+        int year,
+        LocalDateTime createdDate,
+        List<TeacherInfo> teachers
 ) {
 }

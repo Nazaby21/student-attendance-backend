@@ -3,6 +3,10 @@ package com.example.demo.modal;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -18,11 +22,18 @@ public class ClassEntity {
     @Column(name = "class_name")
     private String className;
 
-    private String code;
-
-    private String section;
-
     private String description;
 
     private int year;
+
+    @Column(name = "created_date")
+    private LocalDateTime createdDate;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "class_teachers",
+            joinColumns = @JoinColumn(name = "class_id"),
+            inverseJoinColumns = @JoinColumn(name = "teacher_id")
+    )
+    private Set<User> teachers = new HashSet<>();
 }

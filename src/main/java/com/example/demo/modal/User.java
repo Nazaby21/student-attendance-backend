@@ -19,13 +19,8 @@ public class User {
     private String name;
     private String email;
 
-    @Column(name = "roll_number")
-    private String rollNumber;
-
     @Column(name = "date_of_birth")
     private String dateOfBirth;
-
-    private String address;
 
     @Column(name = "phone_number")
     private String phoneNumber;

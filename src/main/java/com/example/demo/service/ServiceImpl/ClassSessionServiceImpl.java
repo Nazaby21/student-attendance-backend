@@ -3,10 +3,12 @@ package com.example.demo.service.ServiceImpl;
 import com.example.demo.dto.Request.ClassSessionRequest;
 import com.example.demo.dto.Response.ClassSessionResponse;
 import com.example.demo.mapper.ClassSessionMapper;
+import com.example.demo.modal.Attendance;
 import com.example.demo.modal.ClassEntity;
 import com.example.demo.modal.ClassSession;
 import com.example.demo.modal.Subject;
 import com.example.demo.modal.User;
+import com.example.demo.repository.AttendanceRepository;
 import com.example.demo.repository.ClassEntityRepository;
 import com.example.demo.repository.ClassSessionRepository;
 import com.example.demo.repository.SubjectRepository;
@@ -14,6 +16,7 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.service.ClassSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +29,7 @@ public class ClassSessionServiceImpl implements ClassSessionService {
     private final ClassEntityRepository classRepository;
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
+    private final AttendanceRepository attendanceRepository;
     private final ClassSessionMapper sessionMapper;
 
     @Override
@@ -88,7 +92,12 @@ public class ClassSessionServiceImpl implements ClassSessionService {
     }
 
     @Override
+    @Transactional
     public void deleteSession(Long id) {
+        // Delete associated attendance records first
+        List<Attendance> attendances = attendanceRepository.findBySessionId(id);
+        attendanceRepository.deleteAll(attendances);
+
         sessionRepository.deleteById(id);
     }
 }

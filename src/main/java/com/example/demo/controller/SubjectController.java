@@ -5,6 +5,7 @@ import com.example.demo.dto.Response.SubjectResponse;
 import com.example.demo.service.SubjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/subjects")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class SubjectController {
 
     private final SubjectService subjectService;

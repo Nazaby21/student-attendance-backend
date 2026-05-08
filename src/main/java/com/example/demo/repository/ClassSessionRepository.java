@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface ClassSessionRepository extends JpaRepository<ClassSession, Long> {
     List<ClassSession> findByClazzId(Long clazzId);
+    List<ClassSession> findBySubjectId(Long subjectId);
+    List<ClassSession> findByTeacherId(Long teacherId);
     List<ClassSession> findByClazzIdAndDateAndTimeSlot(Long clazzId, String date, String timeSlot);
 }

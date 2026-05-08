@@ -5,12 +5,15 @@ import com.example.demo.dto.Response.BlacklistResponse;
 import com.example.demo.service.BlacklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/blacklist")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
 public class BlacklistController {
 
     private final BlacklistService blacklistService;

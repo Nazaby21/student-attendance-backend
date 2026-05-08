@@ -36,10 +36,20 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        
+        // Check if user is a student
+        boolean isStudent = userDetails.getAuthorities().stream()
+                .anyMatch(r -> r.getAuthority().equals("ROLE_STUDENT"));
+        
+        if (isStudent) {
+            return ResponseEntity
+                    .status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(java.util.Map.of("message", "Error: Students are not allowed to log in to the admin system."));
+        }
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
-
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());

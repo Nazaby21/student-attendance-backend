@@ -1,6 +1,7 @@
 package com.example.demo.service.ServiceImpl;
 
 import com.example.demo.modal.RefreshToken;
+import com.example.demo.modal.User;
 import com.example.demo.repository.RefreshTokenRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.RefreshTokenService;
@@ -30,9 +31,15 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     @Transactional
     public RefreshToken createRefreshToken(Long userId) {
-        RefreshToken refreshToken = new RefreshToken();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        refreshToken.setUser(userRepository.findById(userId).get());
+        // Delete existing refresh token for this user to avoid unique constraint violation
+        refreshTokenRepository.deleteByUser(user);
+        refreshTokenRepository.flush();
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 

@@ -5,12 +5,14 @@ import com.example.demo.dto.Response.UserResponse;
 import com.example.demo.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/students")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
 public class StudentController {
 
     private final StudentService studentService;

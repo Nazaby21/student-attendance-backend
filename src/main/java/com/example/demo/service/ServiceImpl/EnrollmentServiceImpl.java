@@ -3,15 +3,18 @@ package com.example.demo.service.ServiceImpl;
 import com.example.demo.dto.Request.EnrollmentRequest;
 import com.example.demo.dto.Response.EnrollmentResponse;
 import com.example.demo.mapper.EnrollmentMapper;
+import com.example.demo.modal.Attendance;
 import com.example.demo.modal.ClassEntity;
 import com.example.demo.modal.Enrollment;
 import com.example.demo.modal.User;
+import com.example.demo.repository.AttendanceRepository;
 import com.example.demo.repository.ClassEntityRepository;
 import com.example.demo.repository.EnrollmentRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +26,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final ClassEntityRepository classRepository;
+    private final AttendanceRepository attendanceRepository;
     private final EnrollmentMapper enrollmentMapper;
 
     @Override
@@ -68,7 +72,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    @Transactional
     public void unenrollStudent(Long id) {
+        // Delete associated attendance records first
+        List<Attendance> attendances = attendanceRepository.findByEnrollmentId(id);
+        attendanceRepository.deleteAll(attendances);
+
         enrollmentRepository.deleteById(id);
     }
 }

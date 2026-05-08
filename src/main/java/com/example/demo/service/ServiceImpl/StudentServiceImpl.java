@@ -4,9 +4,12 @@ import com.example.demo.dto.Request.UserRequest;
 import com.example.demo.dto.Response.UserResponse;
 import com.example.demo.enumeration.Role;
 import com.example.demo.mapper.UserMapper;
+import com.example.demo.modal.Attendance;
 import com.example.demo.modal.ClassEntity;
 import com.example.demo.modal.Enrollment;
 import com.example.demo.modal.User;
+import com.example.demo.repository.AttendanceRepository;
+import com.example.demo.repository.BlacklistRepository;
 import com.example.demo.repository.ClassEntityRepository;
 import com.example.demo.repository.EnrollmentRepository;
 import com.example.demo.repository.UserRepository;
@@ -26,6 +29,8 @@ public class StudentServiceImpl implements StudentService {
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final ClassEntityRepository classRepository;
+    private final AttendanceRepository attendanceRepository;
+    private final BlacklistRepository blacklistRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -74,9 +79,7 @@ public class StudentServiceImpl implements StudentService {
         
         user.setName(studentRequest.name());
         user.setEmail(studentRequest.email());
-        user.setRollNumber(studentRequest.rollNumber());
         user.setDateOfBirth(studentRequest.dateOfBirth());
-        user.setAddress(studentRequest.address());
         user.setPhoneNumber(studentRequest.phoneNumber());
         
         if (studentRequest.password() != null && !studentRequest.password().isEmpty()) {
@@ -105,9 +108,7 @@ public class StudentServiceImpl implements StudentService {
                 response.id(),
                 response.name(),
                 response.email(),
-                response.rollNumber(),
                 response.dateOfBirth(),
-                response.address(),
                 response.phoneNumber(),
                 response.gender(),
                 response.role(),
@@ -116,9 +117,22 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
     public void deleteStudent(Long id) {
+        // 1. Delete Attendance records for all enrollments of this student
         List<Enrollment> enrollments = enrollmentRepository.findByStudentId(id);
+        for (Enrollment enrollment : enrollments) {
+            List<Attendance> attendances = attendanceRepository.findByEnrollmentId(enrollment.getId());
+            attendanceRepository.deleteAll(attendances);
+        }
+
+        // 2. Delete Blacklist entry if exists
+        blacklistRepository.findByStudentId(id).ifPresent(blacklistRepository::delete);
+
+        // 3. Delete Enrollments
         enrollmentRepository.deleteAll(enrollments);
+
+        // 4. Delete the User record
         userRepository.deleteById(id);
     }
 }

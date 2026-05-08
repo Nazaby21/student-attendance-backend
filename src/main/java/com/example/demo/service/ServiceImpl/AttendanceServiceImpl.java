@@ -19,6 +19,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.example.demo.security.UserDetailsImpl;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
@@ -35,9 +39,30 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final SubjectRepository subjectRepository;
     private final AttendanceMapper attendanceMapper;
 
+    private void checkTeacherAssignment(Long classId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserDetailsImpl) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+            boolean isTeacher = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_TEACHER"));
+            
+            if (isTeacher) {
+                ClassEntity classEntity = classRepository.findById(classId)
+                        .orElseThrow(() -> new RuntimeException("Class not found"));
+                boolean isAssigned = classEntity.getTeachers().stream()
+                        .anyMatch(t -> t.getId() == userDetails.getId());
+                if (!isAssigned) {
+                    throw new RuntimeException("Access Denied: You are not assigned to this class.");
+                }
+            }
+        }
+    }
+
     @Override
     @Transactional
     public AttendanceResponse recordAttendance(AttendanceRequest attendanceRequest) {
+        checkTeacherAssignment(attendanceRequest.classId());
+        
         // Validation: Cannot update future attendance
         LocalDate attendanceDate = LocalDate.parse(attendanceRequest.date());
         if (attendanceDate.isAfter(LocalDate.now())) {
@@ -114,6 +139,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public List<AttendanceResponse> getAttendanceByClassAndDate(Long classId, String date) {
+        checkTeacherAssignment(classId);
         return attendanceRepository.findBySessionClazzIdAndSessionDate(classId, date).stream()
                 .map(attendanceMapper::toAttendanceResponse)
                 .collect(Collectors.toList());
